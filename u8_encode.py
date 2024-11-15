@@ -7,7 +7,7 @@ import pandas as pd
 
 class U8Encoder:
     """
-    U8Encoder 类用于将
+    将列表或DataFrame编码为长256的字节列表，用于PIR实验
     """
 
     @staticmethod
