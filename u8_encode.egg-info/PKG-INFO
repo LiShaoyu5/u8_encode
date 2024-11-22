@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: u8_encode
+Version: 0.1.0
+Summary: A package for encoding and decoding data for PIR experiments.
+Author: dc
+License-File: LICENSE
+Requires-Dist: pandas
