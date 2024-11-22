@@ -4,7 +4,7 @@
 ## Usage
 编码列表:
 ```Python
-from u8_encode import U8Encoder
+import U8Encoder
 
 # Encoding a record
 record = [42, 3.14, "你好helloふぁ😀99"]
@@ -22,7 +22,7 @@ print(f"Decoded Record: {decoded_record}")
 编码DataFrame:
 ```Python
 import pandas as pd
-from u8_encode import U8Encoder
+import U8Encoder
 
 # Sample DataFrame
 df = pd.DataFrame([[42, 3.14, "你好helloふぁ😀99"], [123, 2.71, "你好helloふぁ😀99"]])
@@ -36,6 +36,6 @@ decoded_df = U8Encoder.decode_database(encoded_df)
 print("Encoded DataFrame shape: {}".format(encoded_df.shape))
 print("Decoded DataFrame shape: {}".format(decoded_df.shape))
 
-# Encoded DataFrame shape: (2, 256)
+# Encoded DataFrame shape: (3, 256)
 # Decoded DataFrame shape: (2, 3)
-``
+```

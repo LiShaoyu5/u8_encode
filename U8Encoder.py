@@ -4,6 +4,10 @@ from typing import Any, List, Tuple, Union
 
 import pandas as pd
 
+"""
+PIR实验数据编码解码
+"""
+
 
 def encode_hint(data_type: str, data_bits: int) -> int:
     """
@@ -131,7 +135,14 @@ def encode_database(df: pd.DataFrame) -> pd.DataFrame:
     :param df: 要编码的DataFrame
     :return: 编码后的DataFrame
     """
-    return pd.DataFrame([encode_record(row) for _, row in df.iterrows()])
+    # 编码表头
+    header_record = encode_record(df.columns.tolist())
+    # 编码数据记录
+    data_records = [encode_record(row) for _, row in df.iterrows()]
+    # 组合表头和数据记录
+    encoded_data = [header_record] + data_records
+    # 创建新的DataFrame，不包含索引和列名
+    return pd.DataFrame(encoded_data)
 
 
 def decode_database(encoded_df: pd.DataFrame) -> pd.DataFrame:
@@ -141,7 +152,14 @@ def decode_database(encoded_df: pd.DataFrame) -> pd.DataFrame:
     :param encoded_df: 编码后的DataFrame
     :return: 解码后的DataFrame
     """
-    return pd.DataFrame([decode_record(row) for _, row in encoded_df.iterrows()])
+    # 读取第一行，解码为表头
+    header_encoded = encoded_df.iloc[0].tolist()
+    header = decode_record(header_encoded)
+    # 读取其余行，解码为数据记录
+    data_encoded = encoded_df.iloc[1:].reset_index(drop=True)
+    data_records = [decode_record(row.tolist()) for _, row in data_encoded.iterrows()]
+    # 创建新的DataFrame，使用解码出的表头
+    return pd.DataFrame(data_records, columns=header)
 
 
 class TestU8Encoder(unittest.TestCase):
@@ -210,6 +228,27 @@ class TestU8Encoder(unittest.TestCase):
     def test_decode_record_invalid_length(self):
         with self.assertRaises(ValueError):
             decode_record([0] * 255)
+
+
+class TestU8EncoderExtended(unittest.TestCase):
+    def test_string_length_over_63(self):
+        long_string = "a" * 64
+        with self.assertRaises(ValueError):
+            encode_item(long_string)
+
+    def test_record_length_256_bytes(self):
+        # 创建一个长度为252字节的记录，编码后补零到256字节
+        items = [42] * 28  # 28整数，每个9字节，总共252字节
+        encoded = encode_record(items)
+        self.assertEqual(len(encoded), 256)
+        decoded = decode_record(encoded)
+        self.assertEqual(decoded, items)
+
+    def test_database_encoding_decoding(self):
+        df = pd.DataFrame([[42, 3.14, "hello"], [100, 2.71, "world"]])
+        encoded_df = encode_database(df)
+        decoded_df = decode_database(encoded_df)
+        pd.testing.assert_frame_equal(decoded_df, df)
 
 
 if __name__ == "__main__":
